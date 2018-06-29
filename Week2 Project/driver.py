@@ -6,7 +6,7 @@ import time
 import resource
 import sys
 import math
-
+import sets # imported by myself
 ## The Class that Represents the Puzzle
 
 class PuzzleState(object):
@@ -25,7 +25,7 @@ class PuzzleState(object):
         self.config = config
         self.children = []
 
-        for i, item in enumerate(self.config): # to figure out the initial position of the empty space
+        for i, item in enumerate(self.config): # to figure out the position of the empty space
             if item == 0:
                 self.blank_row = i / self.n
                 self.blank_col = i % self.n
@@ -80,11 +80,8 @@ class PuzzleState(object):
             return PuzzleState(tuple(new_config), self.n, parent=self, action="Down", cost=self.cost + 1)
 
     def expand(self):
-
         """expand the node"""
-
         # add child nodes in order of UDLR
-
         if len(self.children) == 0: 
             up_child = self.move_up()
             if up_child is not None:
@@ -105,15 +102,45 @@ class PuzzleState(object):
         return self.children
 
 def bfs_search(initial_state):
-    initial_state.display()
+    Frontier = Q.Queue() # create a new queue as frontier
+    Frontier.put(initial_state) # initialization
+    Stored = sets.Set()          # Since we can not use 'in' to queue, create a set to store all the elements in Frontier
+    Stored.add(initial_state.config)
+    Explored = sets.Set()        # Used to store the nodes that we have explored
+    Expansion = 0
+    while not Frontier.empty():
+        state = Frontier.get()
+        Explored.add(state.config)
+
+        if test_goal(state.config):
+            print("Cost of Path",state.cost)
+            print("Nodes Expanded",Expansion)
+            find_path(state)
+            return
+        else:
+            state.expand()
+            Expansion +=1 
+            for child in state.children:
+                if (child.config not in Stored) and (child.config not in Explored):
+                    Frontier.put(child)
+                    Stored.add(child)
+
+                
+
+
+        
+        
+
+
+
 
 
 def dfs_search(initial_state):
-    print('test')
+    print('dfstest')
 
 
 def A_star_search(initial_state):
-    print('test')
+    print('astartest')
 
 def calculate_total_cost(state):
 
@@ -130,10 +157,16 @@ def calculate_manhattan_dist(idx, value, n):
 def test_goal(puzzle_state):
 
     """test the state is the goal state or not"""
+    goal_state = tuple([0,1,2,3,4,5,6,7,8])
+    return puzzle_state == goal_state
 
-    ### STUDENT CODE GOES HERE ###
+def find_path(state):
+    path = []
+    while state.parent is not None:
+        path.insert(0,state.action)
+        state = state.parent
+    print(path)
 
-# Main Function that reads in Input and Runs corresponding Algorithm
 
 def main():
 
@@ -145,13 +178,10 @@ def main():
 
     if sm == "bfs":
         bfs_search(hard_state)
-
     elif sm == "dfs":
         dfs_search(hard_state)
-
     elif sm == "ast":
         A_star_search(hard_state)
-
     else:
         print("Enter valid command arguments !")
 
