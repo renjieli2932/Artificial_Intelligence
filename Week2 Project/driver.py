@@ -60,39 +60,23 @@ class PuzzleState(object):
             return PuzzleState(tuple(new_config), self.n, parent=self, action="Right", cost=self.cost + 1)
 
     def move_up(self):
-
         if self.blank_row == 0:
-
             return None
-
         else:
-
             blank_index = self.blank_row * self.n + self.blank_col
-
             target = blank_index - self.n
-
             new_config = list(self.config)
-
             new_config[blank_index], new_config[target] = new_config[target], new_config[blank_index]
-
             return PuzzleState(tuple(new_config), self.n, parent=self, action="Up", cost=self.cost + 1)
 
     def move_down(self):
-
         if self.blank_row == self.n - 1:
-
             return None
-
         else:
-
             blank_index = self.blank_row * self.n + self.blank_col
-
             target = blank_index + self.n
-
             new_config = list(self.config)
-
             new_config[blank_index], new_config[target] = new_config[target], new_config[blank_index]
-
             return PuzzleState(tuple(new_config), self.n, parent=self, action="Down", cost=self.cost + 1)
 
     def expand(self):
@@ -101,30 +85,21 @@ class PuzzleState(object):
 
         # add child nodes in order of UDLR
 
-        if len(self.children) == 0:
-
+        if len(self.children) == 0: 
             up_child = self.move_up()
-
             if up_child is not None:
-
                 self.children.append(up_child)
 
             down_child = self.move_down()
-
             if down_child is not None:
-
                 self.children.append(down_child)
 
             left_child = self.move_left()
-
             if left_child is not None:
-
                 self.children.append(left_child)
 
             right_child = self.move_right()
-
             if right_child is not None:
-
                 self.children.append(right_child)
 
         return self.children
