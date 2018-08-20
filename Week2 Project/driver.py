@@ -102,6 +102,41 @@ class PuzzleState(object):
 
         return self.children
 
+
+class PriorityQueue(object):
+
+    def __init__(self):
+        self.Queue = []
+        self.Distance = []
+
+    def put(self,state):
+        self.Queue.append(state)
+        self.Manhattan()
+
+    def Manhattan(self):
+        gn = self.Queue[-1].cost # cost to reach node n
+        current_state = self.Queue[-1].config
+        size = self.Queue[-1].n # size of the puzzle
+        hn = 0 # heuristic cost from n to goal
+        for i,num in enumerate(current_state): # i: real position, num: desired position
+            if num != 0:
+                hn += abs(i//size - num//size) + abs(i%size - num%size)
+        fn = gn+hn
+        self.Distance.append(fn)
+
+    def empty(self):
+        if self.Queue == []:
+            return True
+        else:
+            return False
+
+    def deleteMin(self):
+        index = self.Distance.index(min(self.Distance)) # Find out the index of the minimum fn
+        state = self.Queue.pop(index)
+        self.Distance.pop(index)
+        return state
+
+
 def bfs_search(initial_state):
     starttime = time.time()
     Frontier = Q.Queue() # create a new queue as frontier
@@ -133,23 +168,63 @@ def bfs_search(initial_state):
 
 
 def dfs_search(initial_state):
-    print('dfstest')
+    starttime = time.time()
+    Frontier = []# create a new queue as frontier
+    Frontier.append(initial_state) # initialization
+    Stored = sets.Set()          # Since we can not use 'in' to queue (to check if the element is in frontier), create a set to store all the elements in Frontier
+    Stored.add(initial_state.config)
+    Explored = sets.Set()        # Used to store the nodes that we have explored
+    Expansion = 0
+    Max_Search_Depth = 1
+    while Frontier != []:
+        state = Frontier.pop()
+        Explored.add(state.config)
+        if test_goal(state.config):
+            endtime = time.time()
+            running_time = endtime - starttime
+            path = find_path(state)
+            output(state.cost,Expansion,path,Max_Search_Depth,running_time)
+            return
+        else:
+            state.expand()
+            state.children = state.children[::-1] # Push onto the stack in reverse-UDLR order;
+            Expansion +=1
+            for child in state.children:
+                if (child.config not in Stored) and (child.config not in Explored):
+                    Frontier.append(child)
+                    Stored.add(child.config)
+                    if child.cost > Max_Search_Depth:
+                        Max_Search_Depth = child.cost
 
 
 def A_star_search(initial_state):
-    print('astartest')
+    starttime = time.time()
+    Frontier = PriorityQueue()
+    Frontier.put(initial_state) # Initialization
+    Stored = sets.Set()          # Since we can not use 'in' to queue (to check if the element is in frontier), create a set to store all the elements in Frontier
+    Stored.add(initial_state.config)
+    Explored = sets.Set()        # Used to store the nodes that we have explored
+    Expansion = 0
+    Max_Search_Depth = 1
+    while not Frontier.empty():
+        state = Frontier.deleteMin()
+        Explored.add(state.config)
+        if test_goal(state.config):
+            endtime = time.time()
+            running_time = endtime - starttime
+            path = find_path(state)
+            output(state.cost, Expansion, path, Max_Search_Depth, running_time)
+            return
+        else:
+            state.expand()
+            Expansion += 1
+            for child in state.children:
+                if (child.config not in Stored) and (child.config not in Explored):
+                    Frontier.put(child)
+                    Stored.add(child.config)
+                    if child.cost > Max_Search_Depth:
+                        Max_Search_Depth = child.cost
 
-def calculate_total_cost(state):
-
-    """calculate the total estimated cost of a state"""
-
-    ### STUDENT CODE GOES HERE ###
-
-def calculate_manhattan_dist(idx, value, n):
-
-    """calculatet the manhattan distance of a tile"""
-
-    ### STUDENT CODE GOES HERE ###
 
 def test_goal(puzzle_state):
 
