@@ -110,16 +110,15 @@ def bfs_search(initial_state):
     Stored.add(initial_state.config)
     Explored = sets.Set()        # Used to store the nodes that we have explored
     Expansion = 0
+    Max_Search_Depth = 1
     while not Frontier.empty():
         state = Frontier.get()
         Explored.add(state.config)
         if test_goal(state.config):
-            print("Cost of Path",state.cost)
-            print("Nodes Expanded",Expansion)
-            find_path(state)
             endtime = time.time()
             running_time = endtime - starttime
-            print("Running TIme",running_time)
+            path = find_path(state)
+            output(state.cost,Expansion,path,Max_Search_Depth,running_time)
             return
         else:
             state.expand()
@@ -128,6 +127,8 @@ def bfs_search(initial_state):
                 if (child.config not in Stored) and (child.config not in Explored):
                     Frontier.put(child)
                     Stored.add(child.config)
+                    if child.cost > Max_Search_Depth:
+                        Max_Search_Depth = child.cost
 
 
 
@@ -161,11 +162,28 @@ def find_path(state):
     while state.parent is not None:
         path.insert(0,state.action)
         state = state.parent
-    print("Path to Goal",path)
+    return path
 
+def output(cost,expansion,path,max_depth,runtime):
+    print('path_to_goal',path)
+    print("cost_of_path", cost)
+    print("nodes_expanded", expansion)
+    print("search_depth", cost)
+    print("max_search_depth", max_depth)
+    print("running_time", runtime)
+    usage = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.0  # in Megabytes
+    print("max_ram_usage", usage)  # Looks weird comparing to the reference results, maybe because I am using Mac?
+
+    with open('output.txt','w') as f:
+        f.write('path_to_goal:'+str(path)+'\n')
+        f.write('cost_of_path:'+str(cost)+'\n')
+        f.write('nodes_expanded:'+str(expansion)+'\n')
+        f.write('search_depth:'+str(cost)+'\n')
+        f.write('max_search_depth:'+str(max_depth)+'\n')
+        f.write('running_time:'+str(runtime) +'\n')
+        f.write('max_ram_usage:'+str(usage)+'\n')
 
 def main():
-
     sm = sys.argv[1].lower()
     begin_state = sys.argv[2].split(",")
     begin_state = tuple(map(int, begin_state))
