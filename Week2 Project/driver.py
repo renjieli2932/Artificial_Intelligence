@@ -7,6 +7,7 @@ import resource
 import sys
 import math
 import sets # imported by myself
+
 ## The Class that Represents the Puzzle
 
 class PuzzleState(object):
@@ -99,9 +100,11 @@ class PuzzleState(object):
             if right_child is not None:
                 self.children.append(right_child)
 
-        return self.children
+        #if_child_null = (self.children == [])
+        return self.children #,if_child_null
 
 def bfs_search(initial_state):
+    starttime = time.time()
     Frontier = Q.Queue() # create a new queue as frontier
     Frontier.put(initial_state) # initialization
     Stored = sets.Set()          # Since we can not use 'in' to queue, create a set to store all the elements in Frontier
@@ -116,22 +119,19 @@ def bfs_search(initial_state):
             print("Cost of Path",state.cost)
             print("Nodes Expanded",Expansion)
             find_path(state)
+            endtime = time.time()
+            running_time = endtime - starttime
+            print("Running TIme",running_time)
             return
         else:
-            state.expand()
-            Expansion +=1 
+            no_expand = state.expand()
+            print(no_expand)
+            if no_expand == False:
+                Expansion +=1
             for child in state.children:
                 if (child.config not in Stored) and (child.config not in Explored):
                     Frontier.put(child)
                     Stored.add(child)
-
-                
-
-
-        
-        
-
-
 
 
 
@@ -165,7 +165,7 @@ def find_path(state):
     while state.parent is not None:
         path.insert(0,state.action)
         state = state.parent
-    print(path)
+    print("Path to Goal",path)
 
 
 def main():
