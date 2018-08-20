@@ -100,21 +100,19 @@ class PuzzleState(object):
             if right_child is not None:
                 self.children.append(right_child)
 
-        #if_child_null = (self.children == [])
-        return self.children #,if_child_null
+        return self.children
 
 def bfs_search(initial_state):
     starttime = time.time()
     Frontier = Q.Queue() # create a new queue as frontier
     Frontier.put(initial_state) # initialization
-    Stored = sets.Set()          # Since we can not use 'in' to queue, create a set to store all the elements in Frontier
+    Stored = sets.Set()          # Since we can not use 'in' to queue (to check if the element is in frontier), create a set to store all the elements in Frontier
     Stored.add(initial_state.config)
     Explored = sets.Set()        # Used to store the nodes that we have explored
     Expansion = 0
     while not Frontier.empty():
         state = Frontier.get()
         Explored.add(state.config)
-
         if test_goal(state.config):
             print("Cost of Path",state.cost)
             print("Nodes Expanded",Expansion)
@@ -124,14 +122,12 @@ def bfs_search(initial_state):
             print("Running TIme",running_time)
             return
         else:
-            no_expand = state.expand()
-            print(no_expand)
-            if no_expand == False:
-                Expansion +=1
+            state.expand()
+            Expansion +=1
             for child in state.children:
                 if (child.config not in Stored) and (child.config not in Explored):
                     Frontier.put(child)
-                    Stored.add(child)
+                    Stored.add(child.config)
 
 
 
