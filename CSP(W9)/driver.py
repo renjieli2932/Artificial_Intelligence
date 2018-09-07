@@ -11,6 +11,11 @@ class sudoku(object):
         self.start_state = sys.argv[1] # Start state of the board
         if len(self.start_state) != 81: # Prevent input error, which frequently happens during debugging...
             raise ValueError("Invalid Initial State")
+        for i in range(81):
+            print(self.start_state[i]+" "),
+            if (i+1) % 9 ==0:
+                print (' ')
+
         self.rows = 'ABCDEFGHI'
         self.columns = '123456789'
         self.variables = self.get_variables() # [A1,A2.....I8,I9]
@@ -191,6 +196,10 @@ class sudoku(object):
         output_name = 'output.txt'
         with open(output_name,'w') as f:
             f.write(output+' '+method)
+        for i in range(81):
+            print(output[i]+" "),
+            if (i+1) % 9 ==0:
+                print (' ')
 
 
 

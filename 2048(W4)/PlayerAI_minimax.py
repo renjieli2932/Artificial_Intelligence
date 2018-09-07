@@ -3,42 +3,42 @@
 # Adversial Search and Games : 2048
 # Renjie Li, rl2932@columbia.edu
 
+from random import randint
 from BaseAI import BaseAI
 import time
 import numpy
+import math
 
 
 class PlayerAI(BaseAI):
 
+
+
     def getMove(self, grid):
         self.start_time = time.clock()  # To prevent timeout
         moves = grid.getAvailableMoves()
-        best_move = 0 # What we need to return, at first I set it to None, but it may lead to some problems..
+        best_move = None # What we need to return
         MAX = -numpy.inf # The root is a MAX node, so we need to set the default MAX to -infinity
-
-        self.smoothweight = 0.1
-        self.monotoweight = 1.0
-        self.emptyweight = 2.7
-        self.maxweight = 1.0
-
-
         for step in moves:
-            #if time.clock() - self.start_time >0.195:
-            #    break
             child = grid.clone() # Deepcopy
             child.move(step)
-            self.depth = 4
-            self.alpha = -numpy.inf
-            self.beta = numpy.inf
-            score = self.Min(child)
+            score = self.Minimax(child,method='Min')
             if score > MAX:
                MAX = score
                best_move = step
         return best_move
 
+
+    def Minimax(self,grid,method):
+        self.depth = 4
+        if method == 'Min':
+            return self.Min(grid)
+        else:
+            return self.Max(grid)
+
     def Min(self,grid):
         # Find the minimum evaluation(heuristic) for the computerAI
-        if time.clock() - self.start_time > 0.04 or self.depth ==0 or grid.canMove()==False:
+        if time.clock() - self.start_time > 0.04 or self.depth ==0:
             return self.Heuristic(grid)
 
         AvailableCells = grid.getAvailableCells() # Return coordinate like [0,1],[1,1]
@@ -57,17 +57,11 @@ class PlayerAI(BaseAI):
             if MaxReturn < Min:
                 Min = MaxReturn
 
-            if Min <= self.alpha:
-                break
-
-            if Min < self.beta:
-                self.beta = Min
-
         return Min
 
     def Max(self,grid):
         # Find the maximum evaluation(heuristic) for the playerAI
-        if time.clock() - self.start_time > 0.04 or self.depth==0  or grid.canMove()==False:
+        if time.clock() - self.start_time > 0.04 or self.depth==0 :
             return self.Heuristic(grid)
 
         AvailableMoves = grid.getAvailableMoves()
@@ -84,12 +78,6 @@ class PlayerAI(BaseAI):
             if MinReturn > Max:
                 Max = MinReturn
 
-            if Max >= self.beta:
-                break
-
-            if Max > self.alpha:
-                self.alpha = Max
-
         return Max
 
 
@@ -98,20 +86,20 @@ class PlayerAI(BaseAI):
     def Heuristic(self,grid):
         if grid.canMove() == False:
             return -numpy.inf
-        emptyCells = len(grid.getAvailableCells())
-        maxTile = grid.getMaxTile()
 
+        gradients = [
+            [[3, 2, 1, 0], [2, 1, 0, -1], [1, 0, -1, -2], [0, -1, -2, -3]],
+            [[0, 1, 2, 3], [-1, 0, 1, 2], [-2, -1, 0, 1], [-3, -2, -1, -0]],
+            [[0, -1, -2, -3], [1, 0, -1, -2], [2, 1, 0, -1], [3, 2, 1, 0]],
+            [[-3, -2, -1, 0], [-2, -1, 0, 1], [-1, 0, 1, 2], [0, 1, 2, 3]]
+        ]
 
-        actual_score = 0
+        values = [0,0,0,0]
+
         for i in range(4):
-            for j in range(4):
-                actual_score+= grid.map[i][j]
+            for x in range(4):
+                for y in range(4):
+                    values[i] += gradients[i][x][y] * grid.map[x][y]
 
 
-        return emptyCells
-
-
-
-
-
-
+        return max(values)
